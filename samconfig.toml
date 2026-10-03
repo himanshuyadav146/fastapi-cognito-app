@@ -1,0 +1,13 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "fastapi-cognito-app"
+resolve_s3 = true
+s3_prefix = "fastapi-cognito-app"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "CognitoUserPoolId=\"us-east-1_vNlxDGXqN\" CognitoClientId=\"1haf1t8lc17amggpvpc3an3cve\""
+image_repositories = []
+
+[default.global.parameters]
+region = "us-east-1"

@@ -1,0 +1,71 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Production Ready FastAPI Cognito DynamoDB API via SAM
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 256
+    Runtime: python3.11
+
+Parameters:
+  CognitoUserPoolId:
+    Type: String
+    Default: "us-east-1_vNlxDGXqN"
+  CognitoClientId:
+    Type: String
+    Default: "1haf1t8lc17amggpvpc3an3cve"
+
+Resources:
+  # DynamoDB Table Resource
+  UserProfilesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: UserProfiles
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+
+  # Serverless Function
+  FastApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: app.main.handler
+      Environment:
+        Variables:
+          USER_POOL_ID: !Ref CognitoUserPoolId
+          CLIENT_ID: !Ref CognitoClientId
+          DYNAMODB_TABLE: !Ref UserProfilesTable
+      Policies:
+        # DynamoDB permissions
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UserProfilesTable
+        # Cognito permissions
+        - Statement:
+            - Effect: Allow
+              Action:
+                - cognito-idp:SignUp
+                - cognito-idp:InitiateAuth
+                - cognito-idp:GetUser
+              Resource: !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${CognitoUserPoolId}"
+      Events:
+        RootPath:
+          Type: Api
+          Properties:
+            Path: /
+            Method: ANY
+        ProxyPath:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+
+Outputs:
+  ApiEndpoint:
+    Description: "API Gateway Endpoint URL"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
