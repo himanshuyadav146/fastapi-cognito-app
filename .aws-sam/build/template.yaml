@@ -25,6 +25,17 @@ Resources:
       KeySchema:
       - AttributeName: userId
         KeyType: HASH
+  AndroidAppVersionsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: AndroidAppVersions
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+      - AttributeName: platform
+        AttributeType: S
+      KeySchema:
+      - AttributeName: platform
+        KeyType: HASH
   FastApiFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -38,10 +49,23 @@ Resources:
             Ref: CognitoClientId
           DYNAMODB_TABLE:
             Ref: UserProfilesTable
+          ANDROID_APP_VERSION_TABLE:
+            Ref: AndroidAppVersionsTable
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
             Ref: UserProfilesTable
+      - DynamoDBReadPolicy:
+          TableName:
+            Ref: AndroidAppVersionsTable
+      - Statement:
+        - Effect: Allow
+          Action:
+          - dynamodb:UpdateItem
+          Resource:
+            Fn::GetAtt:
+            - AndroidAppVersionsTable
+            - Arn
       - Statement:
         - Effect: Allow
           Action:

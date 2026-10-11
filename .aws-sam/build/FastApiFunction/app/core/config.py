@@ -8,9 +8,11 @@ class Settings:
     USER_POOL_ID: str = os.getenv("USER_POOL_ID", "us-east-1_vNlxDGXqN")
     CLIENT_ID: str = os.getenv("CLIENT_ID", "1haf1t8lc17amggpvpc3an3cve")
     DYNAMODB_TABLE: str = os.getenv("DYNAMODB_TABLE", "UserProfiles")
+    ANDROID_APP_VERSION_TABLE: str = os.getenv(
+        "ANDROID_APP_VERSION_TABLE", "AndroidAppVersions"
+    )
 
 settings = Settings()
-
 
 
 
